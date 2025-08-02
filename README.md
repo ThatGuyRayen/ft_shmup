@@ -20,7 +20,7 @@ A simple shoot-em-up game developed using the ncurses library.
 - `A` or `←` - Move left
 - `D` or `→` - Move right
 - `Spacebar` - Shoot
-- `Q` - Quit game
+- `Q` or `ESC` - Quit game
 
 ## Build and Run
 

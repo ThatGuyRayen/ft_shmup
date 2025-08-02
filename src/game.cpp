@@ -106,6 +106,7 @@ void Game::handle_input() {
             }
             break;
         case 'q':
+        case 27: // ESC key
             game_running = false;
             break;
     }
@@ -114,12 +115,14 @@ void Game::handle_input() {
 void Game::update_game() {
     // Update enemies
     for (auto& enemy : enemies) {
-        enemy.update();
-        
-        // Enemy shooting
-        if (enemy.can_shoot()) {
-            bullets.push_back(Bullet(enemy.get_x(), enemy.get_y() + 1, 1));
-            enemy.shoot();
+        if (enemy.is_alive()) {
+            enemy.update();
+            
+            // Enemy shooting
+            if (enemy.can_shoot()) {
+                bullets.push_back(Bullet(enemy.get_x(), enemy.get_y() + 1, 1));
+                enemy.shoot();
+            }
         }
     }
     
@@ -139,11 +142,11 @@ void Game::update_game() {
     // Check collisions
     check_collisions();
     
-    // Remove enemies that are off screen
+    // Remove dead enemies and enemies that are off screen
     enemies.erase(
         std::remove_if(enemies.begin(), enemies.end(),
             [this](const Enemy& enemy) { 
-                return enemy.get_x() - scroll_x < -5; 
+                return !enemy.is_alive() || enemy.get_x() - scroll_x < -5; 
             }),
         enemies.end()
     );
@@ -167,9 +170,11 @@ void Game::render() {
     
     // Draw enemies
     for (const auto& enemy : enemies) {
-        int screen_x = enemy.get_x() - scroll_x;
-        if (screen_x >= 0 && screen_x < screen_width - 2) {
-            mvwaddch(game_win, enemy.get_y(), screen_x + 1, enemy.get_symbol());
+        if (enemy.is_alive()) {
+            int screen_x = enemy.get_x() - scroll_x;
+            if (screen_x >= 0 && screen_x < screen_width - 2) {
+                mvwaddch(game_win, enemy.get_y(), screen_x + 1, enemy.get_symbol());
+            }
         }
     }
     
@@ -211,7 +216,7 @@ void Game::update_bullets() {
 void Game::check_collisions() {
     // Player vs Enemy collisions
     for (auto& enemy : enemies) {
-        if (enemy.get_x() - scroll_x == player.get_x() && enemy.get_y() == player.get_y()) {
+        if (enemy.is_alive() && enemy.get_x() - scroll_x == player.get_x() && enemy.get_y() == player.get_y()) {
             player.take_damage();
             score += 10;
         }
@@ -221,8 +226,9 @@ void Game::check_collisions() {
     for (auto& bullet : bullets) {
         if (bullet.direction == -1) { // Player bullet
             for (auto& enemy : enemies) {
-                if (enemy.get_x() - scroll_x == bullet.x && 
+                if (enemy.is_alive() && enemy.get_x() == bullet.x && 
                     enemy.get_y() == bullet.y) {
+                    enemy.take_damage();
                     bullet.active = false;
                     score += 50;
                     break;

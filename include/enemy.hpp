@@ -7,6 +7,7 @@ class Enemy {
 private:
     int x, y;
     char symbol;
+    bool alive;
     std::chrono::steady_clock::time_point last_shot;
     int shot_cooldown_ms;
     int move_counter;
@@ -19,6 +20,7 @@ public:
     int get_x() const { return x; }
     int get_y() const { return y; }
     char get_symbol() const { return symbol; }
+    bool is_alive() const { return alive; }
     
     // Movement
     void update_position();
@@ -28,6 +30,7 @@ public:
     // Combat
     bool can_shoot() const;
     void shoot();
+    void take_damage();
     
     // AI
     void update();

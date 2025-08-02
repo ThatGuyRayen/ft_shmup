@@ -3,7 +3,7 @@
 #include <random>
 
 Enemy::Enemy(int x, int y, char sym)
-    : x(x), y(y), symbol(sym),
+    : x(x), y(y), symbol(sym), alive(true),
       last_shot(std::chrono::steady_clock::now()), shot_cooldown_ms(2000),
       move_counter(0), move_interval(30) {}
 
@@ -33,6 +33,10 @@ void Enemy::shoot() {
     if (can_shoot()) {
         last_shot = std::chrono::steady_clock::now();
     }
+}
+
+void Enemy::take_damage() {
+    alive = false;
 }
 
 void Enemy::update() {
