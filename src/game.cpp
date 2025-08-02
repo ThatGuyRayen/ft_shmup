@@ -12,6 +12,23 @@ void	Game::init(){
     curs_set(0);            // Hide cursor
     nodelay(stdscr, TRUE);  // Non-blocking getch()
     timeout(0);
+
+    int	wHeight = 3;
+    int gameHeight = LINES - wHeight - 2;
+    int gameWidth = COLS - 2;
+
+    gameWin = newwin(gameHeight, gameWidth, 1 , 1);
+
+    uiWin = newwin(wHeight, COLS, LINES - wHeight, 0);
+    
+    box(stdscr, 0, 0);
+    refresh();
+
+    box(gameWin, 0, 0);
+    wrefresh(gameWin);
+
+    werase(uiWin);
+    wrefresh(uiWin);
 }
 
 
@@ -50,6 +67,25 @@ void Game::handleInput(Player* player, bool& running) {
     }
 }
 
+
+void Game::drawGame(GameEntity& entity) {
+    werase(gameWin);
+    entity.draw(gameWin);
+    box(gameWin, 0, 0);
+    wrefresh(gameWin);
+}
+
+void Game::drawUI(int score, int timeElapsed) {
+    werase(uiWin);
+    mvwprintw(uiWin, 1, 2, "Score: %d", score);
+    mvwprintw(uiWin, 1, COLS / 2, "Time: %d s", timeElapsed);
+    wrefresh(uiWin);
+}
+
 void Game::shutdown() {
+    if (gameWin)
+        delwin(gameWin);
+    if (uiWin)
+        delwin(uiWin);
     endwin();
 }

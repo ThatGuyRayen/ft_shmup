@@ -1,5 +1,6 @@
 
 #pragma once
+#include <ncurses.h>
 
 class GameEntity {
 protected:
@@ -12,7 +13,7 @@ public:
         : x(x), y(y), symbol(symbol) {}
 
     virtual void update() = 0;
-    virtual void draw() = 0;
+    virtual void draw(WINDOW *win) = 0;
 
     virtual ~GameEntity();
 };

@@ -1,12 +1,17 @@
+
 #pragma once
-#include "game.hpp"
+
+#include <ncurses.h>
 #include "game_entity.hpp"
 
-using namespace std;
 
 class Player : public GameEntity {
+private:
+    int maxX, maxY;  // boundaries to keep player inside
+
 public:
-    Player();
+    Player(int maxX, int maxY);
+
     void moveLeft();
     void moveRight();
     void moveUp();
@@ -14,5 +19,6 @@ public:
     void shoot();
 
     void update() override;
-    void draw() override;
+    void draw(WINDOW* win) override;
 };
+
