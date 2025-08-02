@@ -17,7 +17,9 @@ Game::Game()
     // Initialize scenery (simple obstacles)
     for (int i = 0; i < 10; i++) {
         scenery.push_back({20 + i * 15, 10});
+        scenery_alive.push_back(true);
         scenery.push_back({25 + i * 15, 15});
+        scenery_alive.push_back(true);
     }
 }
 
@@ -92,19 +94,27 @@ void Game::handle_input() {
     switch (ch) {
         case 'w':
         case KEY_UP:
-            player.move_up();
+            if (player.can_move_to(player.get_x(), player.get_y() - 1, get_active_obstacles())) {
+                player.move_up();
+            }
             break;
         case 's':
         case KEY_DOWN:
-            player.move_down();
+            if (player.can_move_to(player.get_x(), player.get_y() + 1, get_active_obstacles())) {
+                player.move_down();
+            }
             break;
         case 'a':
         case KEY_LEFT:
-            player.move_left();
+            if (player.can_move_to(player.get_x() - 1, player.get_y(), get_active_obstacles())) {
+                player.move_left();
+            }
             break;
         case 'd':
         case KEY_RIGHT:
-            player.move_right();
+            if (player.can_move_to(player.get_x() + 1, player.get_y(), get_active_obstacles())) {
+                player.move_right();
+            }
             break;
         case ' ':
             if (player.can_shoot()) {
@@ -256,9 +266,11 @@ void Game::check_collisions() {
     
     // Bullet vs Scenery collisions
     for (auto& bullet : bullets) {
-        for (const auto& obstacle : scenery) {
-            if (obstacle.first - scroll_x == bullet.x && obstacle.second == bullet.y) {
+        for (size_t i = 0; i < scenery.size(); i++) {
+            if (scenery_alive[i] && scenery[i].first == bullet.x && scenery[i].second == bullet.y) {
+                scenery_alive[i] = false; // Destroy the obstacle
                 bullet.active = false;
+                score += 10; // Bonus points for destroying obstacles
                 break;
             }
         }
@@ -276,10 +288,12 @@ void Game::draw_ui() {
 }
 
 void Game::draw_scenery() {
-    for (const auto& obstacle : scenery) {
-        int screen_x = obstacle.first - scroll_x;
-        if (screen_x >= 0 && screen_x < screen_width - 2) {
-            mvwaddch(game_win, obstacle.second + 1, screen_x + 1, '#');
+    for (size_t i = 0; i < scenery.size(); i++) {
+        if (scenery_alive[i]) {
+            int screen_x = scenery[i].first - scroll_x;
+            if (screen_x >= 0 && screen_x < screen_width - 2) {
+                mvwaddch(game_win, scenery[i].second + 1, screen_x + 1, '#');
+            }
         }
     }
 }
@@ -312,4 +326,18 @@ void Game::update_window_size() {
         delwin(game_win);
     }
     game_win = newwin(screen_height, screen_width, 0, 0);
+}
+
+std::vector<std::pair<int, int>> Game::get_active_obstacles() const {
+    std::vector<std::pair<int, int>> active_obstacles;
+    for (size_t i = 0; i < scenery.size(); i++) {
+        if (scenery_alive[i]) {
+            // Convert world coordinates to screen coordinates
+            int screen_x = scenery[i].first - scroll_x;
+            if (screen_x >= 0 && screen_x < screen_width - 2) {
+                active_obstacles.push_back({screen_x, scenery[i].second});
+            }
+        }
+    }
+    return active_obstacles;
 }

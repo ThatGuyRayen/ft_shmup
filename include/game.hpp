@@ -40,6 +40,7 @@ private:
     std::vector<Enemy> enemies;
     std::vector<Bullet> bullets;
     std::vector<std::pair<int, int>> scenery;
+    std::vector<bool> scenery_alive;
     
     // Game state
     int score;
@@ -60,6 +61,7 @@ private:
     void draw_scenery();
     void render_game_over();
     void update_window_size();
+    std::vector<std::pair<int, int>> get_active_obstacles() const;
     
 public:
     Game();

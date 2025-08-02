@@ -2,6 +2,8 @@
 #define PLAYER_HPP
 
 #include <chrono>
+#include <vector>
+#include <utility>
 
 class Player {
 private:
@@ -27,6 +29,7 @@ public:
     void move_left();
     void move_right();
     void set_bounds(int max_x, int max_y);
+    bool can_move_to(int new_x, int new_y, const std::vector<std::pair<int, int>>& obstacles) const;
     
     // Combat
     bool can_shoot() const;

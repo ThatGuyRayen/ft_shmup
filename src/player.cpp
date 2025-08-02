@@ -21,6 +21,22 @@ void Player::move_right() {
     if (x < max_x) x++;
 }
 
+bool Player::can_move_to(int new_x, int new_y, const std::vector<std::pair<int, int>>& obstacles) const {
+    // Check bounds
+    if (new_x < 1 || new_x > max_x || new_y < 1 || new_y > max_y) {
+        return false;
+    }
+    
+    // Check obstacles
+    for (const auto& obstacle : obstacles) {
+        if (obstacle.first == new_x && obstacle.second == new_y) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
 void Player::set_bounds(int max_x, int max_y) {
     this->max_x = max_x;
     this->max_y = max_y;
