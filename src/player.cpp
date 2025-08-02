@@ -2,7 +2,7 @@
 #include <chrono>
 
 Player::Player(int start_x, int start_y, int lives)
-    : x(start_x), y(start_y), lives(lives), 
+    : x(start_x), y(start_y), lives(lives), max_x(78), max_y(20),
       last_shot(std::chrono::steady_clock::now()), shot_cooldown_ms(300) {}
 
 void Player::move_up() {
@@ -10,7 +10,7 @@ void Player::move_up() {
 }
 
 void Player::move_down() {
-    if (y < 20) y++;
+    if (y < max_y) y++;
 }
 
 void Player::move_left() {
@@ -18,7 +18,12 @@ void Player::move_left() {
 }
 
 void Player::move_right() {
-    if (x < 78) x++;
+    if (x < max_x) x++;
+}
+
+void Player::set_bounds(int max_x, int max_y) {
+    this->max_x = max_x;
+    this->max_y = max_y;
 }
 
 bool Player::can_shoot() const {

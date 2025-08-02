@@ -58,6 +58,8 @@ private:
     void check_collisions();
     void draw_ui();
     void draw_scenery();
+    void render_game_over();
+    void update_window_size();
     
 public:
     Game();

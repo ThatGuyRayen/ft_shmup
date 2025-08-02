@@ -48,13 +48,30 @@ void Game::cleanup_ncurses() {
 
 void Game::run() {
     init_ncurses();
+    bool game_over = false;
     
-    while (game_running && player.is_alive()) {
+    while (game_running) {
         auto frame_start = std::chrono::steady_clock::now();
         
         handle_input();
-        update_game();
-        render();
+        
+        if (!game_over) {
+            // Check for window resize
+            if (frame_count % 30 == 0) { // Check every 30 frames
+                update_window_size();
+            }
+            
+            update_game();
+            render();
+            
+            // Check if player died
+            if (!player.is_alive()) {
+                game_over = true;
+            }
+        } else {
+            // Game over screen
+            render_game_over();
+        }
         
         // Frame rate control
         auto frame_end = std::chrono::steady_clock::now();
@@ -67,16 +84,6 @@ void Game::run() {
         
         frame_count++;
         last_frame = frame_start;
-    }
-    
-    // Game over screen
-    if (!player.is_alive()) {
-        mvwprintw(game_win, screen_height/2, screen_width/2 - 5, "GAME OVER");
-        mvwprintw(game_win, screen_height/2 + 1, screen_width/2 - 8, "Score: %d", score);
-        mvwprintw(game_win, screen_height/2 + 2, screen_width/2 - 10, "Press any key to exit");
-        wrefresh(game_win);
-        nodelay(stdscr, FALSE);
-        getch();
     }
 }
 
@@ -275,4 +282,34 @@ void Game::draw_scenery() {
             mvwaddch(game_win, obstacle.second + 1, screen_x + 1, '#');
         }
     }
+}
+
+void Game::render_game_over() {
+    werase(game_win);
+    box(game_win, 0, 0);
+    
+    // Draw game over screen
+    mvwprintw(game_win, screen_height/2 - 2, screen_width/2 - 5, "GAME OVER");
+    mvwprintw(game_win, screen_height/2, screen_width/2 - 8, "Score: %d", score);
+    mvwprintw(game_win, screen_height/2 + 1, screen_width/2 - 10, "Press ESC to exit");
+    
+    wrefresh(game_win);
+}
+
+void Game::update_window_size() {
+    int new_height, new_width;
+    getmaxyx(stdscr, new_height, new_width);
+    
+    // Update screen dimensions
+    screen_height = new_height;
+    screen_width = new_width;
+    
+    // Update player bounds (leave some space for borders and UI)
+    player.set_bounds(screen_width - 2, screen_height - 2);
+    
+    // Recreate game window with new size
+    if (game_win) {
+        delwin(game_win);
+    }
+    game_win = newwin(screen_height, screen_width, 0, 0);
 }
