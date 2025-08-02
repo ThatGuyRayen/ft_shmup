@@ -94,26 +94,30 @@ void Game::handle_input() {
     switch (ch) {
         case 'w':
         case KEY_UP:
-            if (player.can_move_to(player.get_x(), player.get_y() - 1, get_active_obstacles())) {
-                player.move_up();
+            if (player.move_with_obstacle_collision(player.get_x(), player.get_y() - 1, get_active_obstacles())) {
+                // Player collided with obstacle, destroy it
+                handle_player_obstacle_collision(player.check_obstacle_collision(player.get_x(), player.get_y() - 1, get_active_obstacles()));
             }
             break;
         case 's':
         case KEY_DOWN:
-            if (player.can_move_to(player.get_x(), player.get_y() + 1, get_active_obstacles())) {
-                player.move_down();
+            if (player.move_with_obstacle_collision(player.get_x(), player.get_y() + 1, get_active_obstacles())) {
+                // Player collided with obstacle, destroy it
+                handle_player_obstacle_collision(player.check_obstacle_collision(player.get_x(), player.get_y() + 1, get_active_obstacles()));
             }
             break;
         case 'a':
         case KEY_LEFT:
-            if (player.can_move_to(player.get_x() - 1, player.get_y(), get_active_obstacles())) {
-                player.move_left();
+            if (player.move_with_obstacle_collision(player.get_x() - 1, player.get_y(), get_active_obstacles())) {
+                // Player collided with obstacle, destroy it
+                handle_player_obstacle_collision(player.check_obstacle_collision(player.get_x() - 1, player.get_y(), get_active_obstacles()));
             }
             break;
         case 'd':
         case KEY_RIGHT:
-            if (player.can_move_to(player.get_x() + 1, player.get_y(), get_active_obstacles())) {
-                player.move_right();
+            if (player.move_with_obstacle_collision(player.get_x() + 1, player.get_y(), get_active_obstacles())) {
+                // Player collided with obstacle, destroy it
+                handle_player_obstacle_collision(player.check_obstacle_collision(player.get_x() + 1, player.get_y(), get_active_obstacles()));
             }
             break;
         case ' ':
@@ -158,6 +162,9 @@ void Game::update_game() {
     
     // Check collisions
     check_collisions();
+    
+    // Check obstacle collision
+    check_obstacle_collision();
     
     // Remove dead enemies and enemies that are off screen
     enemies.erase(
@@ -292,7 +299,7 @@ void Game::draw_scenery() {
         if (scenery_alive[i]) {
             int screen_x = scenery[i].first - scroll_x;
             if (screen_x >= 0 && screen_x < screen_width - 2) {
-                mvwaddch(game_win, scenery[i].second + 1, screen_x + 1, '#');
+                mvwaddch(game_win, scenery[i].second + 1, screen_x + 1, 'o');
             }
         }
     }
@@ -335,9 +342,46 @@ std::vector<std::pair<int, int>> Game::get_active_obstacles() const {
             // Convert world coordinates to screen coordinates
             int screen_x = scenery[i].first - scroll_x;
             if (screen_x >= 0 && screen_x < screen_width - 2) {
-                active_obstacles.push_back({screen_x, scenery[i].second});
+                // Add +1 to Y coordinate to match the rendering offset
+                active_obstacles.push_back({screen_x, scenery[i].second + 1});
             }
         }
     }
     return active_obstacles;
+}
+
+void Game::check_obstacle_collision() {
+    int player_x = player.get_x();
+    int player_y = player.get_y();
+    
+    for (size_t i = 0; i < scenery.size(); i++) {
+        if (scenery_alive[i]) {
+            int obstacle_screen_x = scenery[i].first - scroll_x;
+            int obstacle_y = scenery[i].second + 1;
+            
+            // Check if obstacle is on screen and colliding with player
+            if (obstacle_screen_x >= 0 && obstacle_screen_x < screen_width - 2 &&
+                obstacle_screen_x == player_x && obstacle_y == player_y) {
+                
+                // Player takes damage
+                player.take_damage();
+                
+                // Destroy the obstacle
+                scenery_alive[i] = false;
+                
+                // Add some score for destroying the obstacle
+                score += 5;
+            }
+        }
+    }
+}
+
+void Game::handle_player_obstacle_collision(int collision_index) {
+    if (collision_index >= 0 && collision_index < static_cast<int>(scenery.size())) {
+        // Destroy the obstacle
+        scenery_alive[collision_index] = false;
+        
+        // Add some score for destroying the obstacle
+        score += 5;
+    }
 }

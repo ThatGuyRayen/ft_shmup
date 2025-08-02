@@ -62,6 +62,8 @@ private:
     void render_game_over();
     void update_window_size();
     std::vector<std::pair<int, int>> get_active_obstacles() const;
+    void check_obstacle_collision();
+    void handle_player_obstacle_collision(int collision_index);
     
 public:
     Game();

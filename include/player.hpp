@@ -24,10 +24,10 @@ public:
     bool is_alive() const { return lives > 0; }
     
     // Movement
-    void move_up();
-    void move_down();
-    void move_left();
-    void move_right();
+    void move_up(const std::vector<std::pair<int, int>>& obstacles);
+    void move_down(const std::vector<std::pair<int, int>>& obstacles);
+    void move_left(const std::vector<std::pair<int, int>>& obstacles);
+    void move_right(const std::vector<std::pair<int, int>>& obstacles);
     void set_bounds(int max_x, int max_y);
     bool can_move_to(int new_x, int new_y, const std::vector<std::pair<int, int>>& obstacles) const;
     
@@ -35,6 +35,10 @@ public:
     bool can_shoot() const;
     void shoot();
     void take_damage();
+    
+    // Obstacle collision
+    int check_obstacle_collision(int new_x, int new_y, const std::vector<std::pair<int, int>>& obstacles) const;
+    bool move_with_obstacle_collision(int new_x, int new_y, const std::vector<std::pair<int, int>>& obstacles);
 };
 
 #endif
