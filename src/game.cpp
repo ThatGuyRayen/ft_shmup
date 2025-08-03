@@ -325,12 +325,15 @@ void Game::display_message_style(std::string message, int style)
 	switch(style) {
 		case 1: // bold text
 			attron(A_BOLD);
+			attron(COLOR_RED);
 			mvprintw(msg_y, msg_x, "%s", message.c_str());
 			attroff(A_BOLD);
+			attroff(COLOR_RED);
 			break;
 
 		case 2:
 			// future styles (e.g., colored borders) go here
+			mvprintw(msg_y, msg_x, "%s", message.c_str());
 			break;
 	}
 }
@@ -343,7 +346,8 @@ bool Game::is_terminal_too_small(int min_width, int min_height)
 	if (screen_height < min_height || screen_width < min_width) 
 	{
 		clear(); // clear stdscr
-		display_message_style("Window is too small!\nResize to at least 50x20", 1);
+		display_message_style("Window is too small!\nResize, please", 1);
+		display_message_style("Window is too small!\nResize, please", 2);
 		refresh(); // refresh to show message
 		return true;
 	}
@@ -351,18 +355,24 @@ bool Game::is_terminal_too_small(int min_width, int min_height)
 }
 
 void Game::update_window_size() {
-    int new_height, new_width;
+	noecho();
+    cbreak();
+    keypad(stdscr, TRUE);
+    start_color();
 
-    // Wait until terminal is large enough
-    while (is_terminal_too_small(50, 20))
+    // Check until window is large enough
+    while (true)
     {
+        getmaxyx(stdscr, screen_height, screen_width);
+
+        if (screen_height >= 20 && screen_width >= 50)
+            break;
+
+        clear();
+        display_message_style("Window is too small!\nResize to at least 50x20", 1);
+        refresh();
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
     }
-
-    // Terminal is now large enough, capture new size
-    getmaxyx(stdscr, new_height, new_width);
-    screen_height = new_height;
-    screen_width = new_width;
 
     player.set_bounds(screen_width - 2, screen_height - 2);
 
