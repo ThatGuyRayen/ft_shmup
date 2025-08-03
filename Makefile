@@ -5,7 +5,7 @@
 # Compiler and flags
 CXX       := c++
 CXXFLAGS  := -Wall -Wextra -Werror -std=c++17
-LDFLAGS   := -lncurses
+LDFLAGS   := -lncursesw
 
 # Directories
 SRC_DIR   := src

@@ -1,26 +1,25 @@
 
+// entity_manager.hpp
 #pragma once
-
-#include "game_entity.hpp"
-#include "projectile.hpp"
-#include <ncurses.h>
 #include <vector>
+#include "game_entity.hpp"
+#include <ncurses.h>
 
-using namespace	std;
+class EntityManager {
+private:
+    std::vector<GameEntity*> entities;
 
-class EntityManager
-{
-  private:
-	vector<GameEntity *> entities;
+public:
+    ~EntityManager();
 
-  public:
-	~EntityManager();
+    void add(GameEntity* entity);
+    void remove(GameEntity* entity);
+    void updateAll();
+    void drawAll(WINDOW* win);
 
-	void add(GameEntity *entity);
-	void remove(GameEntity *entity);
-
-	void updateAll();
-	void drawAll(WINDOW *win);
-
-	// Helper to clean up projectiles or any entities flagged for removal (optional)
+    // Add this getter:
+    const std::vector<GameEntity*>& getEntities() const {
+        return entities;
+    }
 };
+

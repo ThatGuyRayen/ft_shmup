@@ -37,7 +37,7 @@ void Player::moveDown()
 
 Projectile *Player::shoot()
 {
-	return (new Projectile(x + 2, y - 1));
+	return (new Projectile(x + 2, y - 1, 0, -1));
 }
 
 void Player::update()

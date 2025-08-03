@@ -1,15 +1,17 @@
 #include "projectile.hpp"
 
-Projectile::Projectile(int startX, int startY)
+Projectile::Projectile(int startX, int startY, int deltaX, int deltaY)
 {
-	x = startX;
-	y = startY;
-	symbol = '*'; // vertical bullet
+    x = startX;
+    y = startY;
+    dx = deltaX;
+    dy = deltaY;
+    symbol = '|';  // or whatever symbol you prefer
 }
 
-void Projectile::update()
-{
-	y--; // move up by 1 cell every frame
+void Projectile::update() {
+    x += dx;
+    y += dy;
 }
 
 void Projectile::draw(WINDOW *win)
