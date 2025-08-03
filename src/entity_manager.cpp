@@ -33,14 +33,12 @@ void EntityManager::updateAll()
     {
         e->update();
 
-        // Make enemies shoot if ready
         Enemy* enemy = dynamic_cast<Enemy*>(e);
         if (enemy && enemy->readyToShoot())
         {
-	    Projectile* shot = enemy->shoot();
-	    if (shot)
-		    add(shot);
-            add(enemy->shoot());
+            Projectile* shot = enemy->shoot();
+            if (shot)
+                add(shot);
         }
     }
 
@@ -55,6 +53,7 @@ void EntityManager::updateAll()
         return false;
     }), entities.end());
 }
+
 
 void EntityManager::drawAll(WINDOW* win)
 {

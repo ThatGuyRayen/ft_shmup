@@ -1,4 +1,3 @@
-
 #include "enemy.hpp"
 #include <cstdlib> // for rand()
 
@@ -17,7 +16,6 @@ void Enemy::setEntityManager(EntityManager* manager)
 
 Projectile* Enemy::shoot()
 {
-    // Shoot downward
     return new Projectile(x, y + 1, 0, 1);
 }
 
