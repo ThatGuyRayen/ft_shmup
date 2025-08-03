@@ -11,6 +11,7 @@ class Enemy : public GameEntity {
     int maxY;
     int shootCooldown;
     int shootTimer;
+    int moveTimer;
     EntityManager* entityManager;
 public:
     Enemy(int startX, int startY, int maxY);

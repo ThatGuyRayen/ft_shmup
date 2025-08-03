@@ -7,7 +7,7 @@
 Enemy::Enemy(int startX, int startY, int maxY)
     : x(startX), y(startY),
       maxY(maxY),
-      shootCooldown(30), shootTimer(0),
+      shootCooldown(30), shootTimer(0), moveTimer(0),
       entityManager(nullptr)
 {
 }
@@ -33,9 +33,14 @@ bool Enemy::readyToShoot() const
 
 void Enemy::update()
 {
+	moveTimer++;
     // Straight downward movement
-    if (y < maxY - 2)
-        y++;
+	if (moveTimer >= 5)
+	{
+		if (y < maxY - 2)
+			y++;
+		moveTimer = 0;
+	}
 
     shootTimer++;
 
