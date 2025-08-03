@@ -37,6 +37,9 @@ void EntityManager::updateAll()
         Enemy* enemy = dynamic_cast<Enemy*>(e);
         if (enemy && enemy->readyToShoot())
         {
+	    Projectile* shot = enemy->shoot();
+	    if (shot)
+		    add(shot);
             add(enemy->shoot());
         }
     }
