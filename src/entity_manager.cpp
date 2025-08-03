@@ -3,6 +3,7 @@
 #include "enemy.hpp"
 #include "projectile.hpp"
 #include "game_entity.hpp"
+#include "obstacle.hpp"
 #include <algorithm>
 
 EntityManager::~EntityManager() = default;
@@ -46,7 +47,8 @@ void EntityManager::updateAll()
 void EntityManager::drawAll(WINDOW* win)
 {
     for (auto& e : entities)
-        e->draw(win);
+        if (e)
+            e->draw(win);
 }
 
 static bool playerHitByProjectile(int px, int py, const Player& player)
@@ -74,6 +76,14 @@ void EntityManager::handleCollisions(Player& player)
             int py = p->getY();
             int pdy = p->getDy();
 
+            // Projectile hits obstacle
+            for (auto& e2 : entities) {
+                auto* obs = dynamic_cast<Obstacle*>(e2.get());
+                if (obs && px == obs->getX() && py == obs->getY()) {
+                    toRemove.push_back(p);
+                }
+            }
+
             // Player's projectile upward hitting enemy
             if (pdy < 0)
             {
@@ -96,6 +106,17 @@ void EntityManager::handleCollisions(Player& player)
                 {
                     toRemove.push_back(p);
                     player.loseLife();
+                }
+            }
+        }
+
+        // Enemy hits obstacle
+        auto* enemy = dynamic_cast<Enemy*>(e1.get());
+        if (enemy) {
+            for (auto& e2 : entities) {
+                auto* obs = dynamic_cast<Obstacle*>(e2.get());
+                if (obs && enemy->getX() == obs->getX() && enemy->getY() == obs->getY()) {
+                    toRemove.push_back(enemy);
                 }
             }
         }

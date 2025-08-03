@@ -41,7 +41,10 @@ void Player::moveDown()
 
 Projectile* Player::shoot()
 {
-    return new Projectile(x + 2, y - 1, 0, -1);
+    // Only shoot if projectile will be in bounds
+    if (y - 1 >= 0 && x + 2 >= 0 && x + 2 < maxX)
+        return new Projectile(x + 2, y - 1, 0, -1);
+    return nullptr;
 }
 
 void Player::update()
@@ -51,6 +54,7 @@ void Player::update()
 
 void Player::draw(WINDOW* win)
 {
+    if (!win) return;
     int max_y, max_x;
     getmaxyx(win, max_y, max_x);
     auto safe_mvwaddch = [&](int yy, int xx, chtype ch) {

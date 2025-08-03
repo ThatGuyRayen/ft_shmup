@@ -39,23 +39,28 @@ void Enemy::update()
 
     shootTimer++;
 
+    // Defensive: don't shoot if about to go off screen
     if (entityManager && readyToShoot() && (rand() % 100) < 20) // more frequent for responsiveness
     {
-        Projectile* p = shoot();
-        if (p)
-        {
-            entityManager->add(p);
-            resetShootTimer();
+        // Only shoot if projectile will be in bounds
+        if (y + 1 < maxY - 1 && y + 1 >= 0) {
+            Projectile* p = shoot();
+            if (p)
+            {
+                entityManager->add(p);
+                resetShootTimer();
+            }
         }
     }
 }
 
 void Enemy::draw(WINDOW* win)
 {
+    if (!win) return;
     int max_y, max_x;
     getmaxyx(win, max_y, max_x);
     if (y >= 0 && y < max_y && x >= 0 && x < max_x)
     {
-        mvwaddch(win, y, x, 'V');
+        mvwaddch(win, y, x, 'Y');
     }
 }

@@ -13,6 +13,7 @@ void Projectile::update() {
 
 void Projectile::draw(WINDOW* win)
 {
+    if (!win) return;
     int max_y, max_x;
     getmaxyx(win, max_y, max_x);
     if (y >= 0 && y < max_y && x >= 0 && x < max_x)
