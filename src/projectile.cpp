@@ -1,12 +1,9 @@
 #include "projectile.hpp"
+#include <ncurses.h>
 
 Projectile::Projectile(int startX, int startY, int deltaX, int deltaY)
+    : x(startX), y(startY), dx(deltaX), dy(deltaY), symbol('|')
 {
-    x = startX;
-    y = startY;
-    dx = deltaX;
-    dy = deltaY;
-    symbol = '|';  // or whatever symbol you prefer
 }
 
 void Projectile::update() {
@@ -14,12 +11,15 @@ void Projectile::update() {
     y += dy;
 }
 
-void Projectile::draw(WINDOW *win)
+void Projectile::draw(WINDOW* win)
 {
-	mvwaddch(win, y, x, symbol);
+    int max_y, max_x;
+    getmaxyx(win, max_y, max_x);
+    if (y >= 0 && y < max_y && x >= 0 && x < max_x)
+        mvwaddch(win, y, x, symbol);
 }
 
-bool Projectile::isOffScreen() const
+bool Projectile::isOffScreen(int maxY) const
 {
-	return (y < 1); // off top of window
+    return (y < 1) || (y >= maxY - 1); // off top or bottom
 }

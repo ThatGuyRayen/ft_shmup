@@ -1,91 +1,98 @@
-
 #include "entity_manager.hpp"
 #include "game.hpp"
 #include "player.hpp"
 #include "projectile.hpp"
+#include "enemy.hpp"
 #include <ncurses.h>
 #include <locale.h>
-#include "enemy.hpp"
 #include <ctime>
 #include <cstdlib>
 
-int main(void)
+int main()
 {
     setlocale(LC_ALL, "");
     Game game;
-    int maxX = 0, maxY = 0;
     EntityManager entityManager;
     bool running = true;
     int ch;
+    int score = 0;
+    int timeElapsed = 0;
 
-    // Seed random for enemy behavior and spawning
-    srand(time(NULL));
+    srand(time(nullptr));
 
     game.init();
-    maxX = getmaxx(game.getGameWin());
-    maxY = getmaxy(game.getGameWin());
+    int maxX = getmaxx(game.getGameWin());
+    int maxY = getmaxy(game.getGameWin());
 
     Player player(maxX, maxY);
     player.setEntityManager(&entityManager);
 
-    // Initial enemy spawn example (optional)
-    Enemy* enemy = new Enemy(maxX / 2, 2, maxX, maxY);
+    // Initial enemy spawn at top
+    Enemy* enemy = new Enemy(rand() % (maxX - 2) + 1, 1, maxY);
     enemy->setEntityManager(&entityManager);
     entityManager.add(enemy);
 
-    // Set up input mode
+    // Input setup on game window
     nodelay(game.getGameWin(), TRUE);
-    keypad(game.getGameWin(), TRUE); // Enable arrow keys
+    keypad(game.getGameWin(), TRUE);
 
+    const int frameDelayMs = 50; // ~20 FPS
     while (running)
     {
-        // 1. Clear previous key states for player (to detect current keys only)
+        // Input: clear old state
         player.clearKeys();
-
-        // 2. Read all current key presses available this frame
         while ((ch = wgetch(game.getGameWin())) != ERR)
         {
-            if (ch == 'q')
+            if (ch == 'q' || ch == 27)
             {
                 running = false;
             }
             else
             {
-                player.setKeyDown(ch); // track keys currently pressed
+                player.setKeyDown(ch);
             }
         }
 
-        // 3. Possibly spawn new enemies randomly at top
-        if ((rand() % 50) == 0) // Adjust spawn rate here
+        // Randomly spawn new enemy at top row
+        if ((rand() % 50) == 0)
         {
             int spawnX = rand() % (maxX - 2) + 1;
-            Enemy* newEnemy = new Enemy(spawnX, 1, maxX, maxY);
+            Enemy* newEnemy = new Enemy(spawnX, 1, maxY);
             newEnemy->setEntityManager(&entityManager);
             entityManager.add(newEnemy);
         }
 
-        // 4. Update game state
+        // Update
         player.update();
         entityManager.updateAll();
-	entityManager.handleCollisions(player);
-        // 5. Clear window
+        entityManager.handleCollisions(player);
+
+        // Check player death
+        if (player.isDead())
+        {
+            werase(game.getGameWin());
+            box(game.getGameWin(), 0, 0);
+            mvwprintw(game.getGameWin(), maxY / 2, maxX / 2 - 5, "GAME OVER");
+            wrefresh(game.getGameWin());
+            napms(1500);
+            break;
+        }
+
+        // Draw
         werase(game.getGameWin());
-
-        // 6. Draw border
         box(game.getGameWin(), 0, 0);
-
-        // 7. Draw all entities
         player.draw(game.getGameWin());
         entityManager.drawAll(game.getGameWin());
-
-        // 8. Refresh window
         wrefresh(game.getGameWin());
 
-        // 9. Control frame rate (~20 FPS)
-        napms(50);
+        // UI
+        game.drawUI(score, timeElapsed, player.getLives());
+
+        // Frame control
+        napms(frameDelayMs);
+        timeElapsed += frameDelayMs / 1000;
     }
 
     game.shutdown();
     return 0;
 }
-
