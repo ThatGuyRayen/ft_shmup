@@ -1,6 +1,4 @@
-
 #include "player.hpp"
-
 
 
 
@@ -34,8 +32,8 @@ void Player::moveDown() {
         y++;
 }
 
-void Player::shoot() {
-    // Implement shooting logic later
+Projectile* Player::shoot() {
+	return new Projectile(x+2, y - 1);
 }
 
 void Player::update() {
@@ -53,5 +51,18 @@ void Player::draw(WINDOW* win) {
     mvwaddch(win, y+2, x+2, '=');
     mvwaddch(win, y+2, x+3, '=');
     mvwaddch(win, y+2, x+4, '>');
+}
+
+void Player::handleInput(int key) {
+    switch (key) {
+        case KEY_LEFT: moveLeft(); break;
+        case KEY_RIGHT: moveRight(); break;
+        case KEY_UP: moveUp(); break;
+        case KEY_DOWN: moveDown(); break;
+        case ' ': /* Shooting is special, you can't spawn projectile here since Player doesn't manage entities */
+            // You can set a flag here like shootingRequested = true;
+            // Or better: just return a bool to indicate shooting request
+            break;
+    }
 }
 

@@ -1,39 +1,62 @@
-#include <iostream>
+
 #include <ncurses.h>
 #include "game.hpp"
 #include "player.hpp"
+#include "entity_manager.hpp"
+#include "projectile.hpp"
 
-
-using namespace std;
-
-int	main(){
-	Game game;
-	game.init();
+int main() {
+    Game game;
+    game.init();
 
     int maxX = getmaxx(game.getGameWin());
     int maxY = getmaxy(game.getGameWin());
-	Player player(maxX, maxY);
-	bool running = true;
-	int	score = 0;
-	int	timeElapsed = 0;
+
+    Player player(maxX, maxY);
+    EntityManager entityManager;
+
+    // Make getch non-blocking
+    nodelay(game.getGameWin(), TRUE);
+    keypad(game.getGameWin(), TRUE); // Enable arrow keys
+
+    bool running = true;
 
     while (running) {
-        werase(game.getGameWin());       // Clear game window for fresh frame
+        int ch = wgetch(game.getGameWin());
 
-        game.handleInput(&player, running); // Process input
-        player.update();                 // Update player state (if needed)
-        player.draw(game.getGameWin()); // Draw player in game window
+        if (ch != ERR) { // Key pressed
+            player.handleInput(ch);
 
-        box(game.getGameWin(), 0, 0);   // Draw border around game window
-        wrefresh(game.getGameWin());    // Refresh game window
+            if (ch == ' ') {
+                entityManager.add(player.shoot());
+            } else if (ch == 'q') {
+                running = false;
+            }
+        }
 
-        game.drawUI(score, timeElapsed); // Update and display UI (score/time)
+        // Update game state
+        player.update();
+        entityManager.updateAll();
 
-        napms(50);                      // Frame delay (~20 FPS)
-        timeElapsed++;
+        // Clear window
+        werase(game.getGameWin());
+
+        // Draw border
+        box(game.getGameWin(), 0, 0);
+
+        // Draw player and entities
+        player.draw(game.getGameWin());
+        entityManager.drawAll(game.getGameWin());
+
+        // Refresh to show changes
+        wrefresh(game.getGameWin());
+
+        // Control frame rate (~20 FPS)
+        napms(50);
     }
 
+    game.shutdown();
 
-	game.shutdown();
-	return (0);
+    return 0;
 }
+

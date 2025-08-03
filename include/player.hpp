@@ -3,7 +3,7 @@
 
 #include <ncurses.h>
 #include "game_entity.hpp"
-
+#include "projectile.hpp"
 
 class Player : public GameEntity {
 private:
@@ -16,8 +16,8 @@ public:
     void moveRight();
     void moveUp();
     void moveDown();
-    void shoot();
-
+    Projectile* shoot();
+    void handleInput(int key);
     void update() override;
     void draw(WINDOW* win) override;
 };
