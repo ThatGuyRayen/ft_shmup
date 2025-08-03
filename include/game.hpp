@@ -6,6 +6,7 @@
 #include <chrono>
 #include "player.hpp"
 #include "enemy.hpp"
+#include <string>
 
 // Simple game entity structure
 struct Entity {
@@ -49,6 +50,7 @@ private:
     std::chrono::steady_clock::time_point last_frame;
     int frame_count;
     
+	void display_message_style(std::string message, int style);
     void init_ncurses();
     void cleanup_ncurses();
     void handle_input();
@@ -60,6 +62,7 @@ private:
     void draw_ui();
     void draw_scenery();
     void render_game_over();
+	bool is_terminal_too_small(int new_width, int new_height);
     void update_window_size();
     std::vector<std::pair<int, int>> get_active_obstacles() const;
     void check_obstacle_collision();
