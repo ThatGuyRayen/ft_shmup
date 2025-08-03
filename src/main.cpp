@@ -36,17 +36,22 @@ int	main(void)
 
 	while (running)
 	{
-		while ((ch = wgetch(game.getGameWin())) != ERR)
-		{
-			if (ch == 'q')
-			{
-				running = false;
-			}
-			else
-			{
-				player.handleInput(ch);
-			}
-		}
+// 1. Clear previous key states
+player.clearKeys();
+
+// 2. Read all current key presses
+while ((ch = wgetch(game.getGameWin())) != ERR)
+{
+	if (ch == 'q')
+	{
+		running = false;
+	}
+	else
+	{
+		player.setKeyDown(ch); // track currently pressed keys
+	}
+}
+
         for (GameEntity* ent : entityManager.getEntities()) {
             Enemy* en = dynamic_cast<Enemy*>(ent);
             if (en) {
