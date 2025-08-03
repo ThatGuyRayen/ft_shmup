@@ -1,0 +1,18 @@
+{
+	"files.associations": {
+		"*.css": "css",
+		"deque": "cpp",
+		"string": "cpp",
+		"unordered_map": "cpp",
+		"unordered_set": "cpp",
+		"vector": "cpp",
+		"numbers": "cpp",
+		"array": "cpp",
+		"memory": "cpp",
+		"istream": "cpp",
+		"ranges": "cpp",
+		"functional": "cpp",
+		"tuple": "cpp",
+		"utility": "cpp"
+	}
+}

@@ -2,13 +2,13 @@
 // entity_manager.hpp
 #pragma once
 #include <vector>
-#include "game_entity.hpp"
+#include <memory>    
 #include "player.hpp"
 #include <ncurses.h>
 
 class EntityManager {
 private:
-    std::vector<GameEntity*> entities;
+	std::vector<std::unique_ptr<GameEntity>> entities;
 
 public:
     ~EntityManager();
@@ -19,7 +19,7 @@ public:
     void drawAll(WINDOW* win);
     void handleCollisions(Player &player);
     // Add this getter:
-    const std::vector<GameEntity*>& getEntities() const {
+    const std::vector<std::unique_ptr<GameEntity>>& getEntities() const {
         return entities;
     }
 };

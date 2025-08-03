@@ -3,52 +3,51 @@
 #include "player.hpp"
 #include "enemy.hpp"
 #include "projectile.hpp"
+#include "game_entity.hpp"
 #include <algorithm>
 
-EntityManager::~EntityManager()
-{
-    for (auto e : entities)
-        delete e;
-    entities.clear();
-}
+// EntityManager::~EntityManager()
+// {
+//     for (auto& e : entities)
+//         delete e.get();
+//     entities.clear();
+// }
+
+EntityManager::~EntityManager() = default;
 
 void EntityManager::add(GameEntity* entity)
 {
-    entities.push_back(entity);
+    entities.emplace_back(std::unique_ptr<GameEntity>(entity));
 }
 
 void EntityManager::remove(GameEntity* entity)
 {
-    auto it = std::find(entities.begin(), entities.end(), entity);
-    if (it != entities.end())
-    {
-        delete *it;
-        entities.erase(it);
-    }
+	auto it = std::find_if(entities.begin(), entities.end(),
+    [entity](const std::unique_ptr<GameEntity>& e) {
+        return e.get() == entity;
+    });
+
+	if (it != entities.end())
+    	entities.erase(it); // as it is a unique ptr now - auto delete
 }
 
 void EntityManager::updateAll()
 {
-    for (auto e : entities)
+    for (auto& e : entities)
     {
         e->update();
     }
 
     // Remove off-screen projectiles
-    entities.erase(std::remove_if(entities.begin(), entities.end(), [](GameEntity* e) {
-        Projectile* p = dynamic_cast<Projectile*>(e);
-        if (p && p->isOffScreen())
-        {
-            delete p;
-            return true;
-        }
-        return false;
+    entities.erase(std::remove_if(entities.begin(), entities.end(), [](const std::unique_ptr<GameEntity>& e) {
+        Projectile* p = dynamic_cast<Projectile*>(e.get());
+        return p && p->isOffScreen();
     }), entities.end());
 }
 
 void EntityManager::drawAll(WINDOW* win)
 {
-    for (auto e : entities)
+    for (auto& e : entities)
         e->draw(win);
 }
 
@@ -56,9 +55,9 @@ void EntityManager::handleCollisions(Player& player)
 {
     std::vector<GameEntity*> toRemove;
 
-    for (auto e1 : entities)
+    for (auto& e1 : entities)
     {
-        Projectile* p = dynamic_cast<Projectile*>(e1);
+        auto* p = dynamic_cast<Projectile*>(e1.get());
         if (!p)
             continue;
 
@@ -66,34 +65,39 @@ void EntityManager::handleCollisions(Player& player)
         int py = p->getY();
         int pdy = p->getDy();
 
-        // Player projectile (dy < 0) hits enemy
+        // player shot upwards - hits enemy (plus score)
         if (pdy < 0)
         {
-            for (auto e2 : entities)
+            for (const auto& e2 : entities)
             {
-                Enemy* enemy = dynamic_cast<Enemy*>(e2);
+                auto* enemy = dynamic_cast<Enemy*>(e2.get());
                 if (!enemy)
                     continue;
 
                 if (px == enemy->getX() && py == enemy->getY())
                 {
-                    toRemove.push_back(p);
-                    toRemove.push_back(enemy);
+                    if (std::find(toRemove.begin(), toRemove.end(), p) == toRemove.end())
+                        toRemove.push_back(p);
+                    if (std::find(toRemove.begin(), toRemove.end(), enemy) == toRemove.end())
+                        toRemove.push_back(enemy);
                 }
             }
         }
-        // Enemy projectile (dy > 0) hits player
+        // enemy shot downwards = shot the player (minus life)
         else if (pdy > 0)
         {
             if (px == player.getX() && py == player.getY())
             {
-                toRemove.push_back(p);
-                // TODO: Handle player damage or lives
+                if (std::find(toRemove.begin(), toRemove.end(), p) == toRemove.end())
+                    toRemove.push_back(p);
             }
         }
     }
 
-    for (auto e : toRemove)
-        remove(e);
+ 	// cleaning of all the leftover from the entities as unique pointers
+     entities.erase(std::remove_if(entities.begin(), entities.end(),
+        [&](const std::unique_ptr<GameEntity>& e) {
+            return std::find(toRemove.begin(), toRemove.end(), e.get()) != toRemove.end();
+        }), entities.end());
 }
 

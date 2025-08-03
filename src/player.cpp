@@ -52,15 +52,22 @@ void Player::update()
 
 void Player::draw(WINDOW *win)
 {
-	mvwaddch(win, y, x + 2, '^');
-	mvwaddch(win, y + 1, x + 1, '/');
-	mvwaddch(win, y + 1, x + 2, '|');
-	mvwaddch(win, y + 1, x + 3, '\\');
-	mvwaddch(win, y + 2, x, '<');
-	mvwaddch(win, y + 2, x + 1, '=');
-	mvwaddch(win, y + 2, x + 2, '=');
-	mvwaddch(win, y + 2, x + 3, '=');
-	mvwaddch(win, y + 2, x + 4, '>');
+	int max_y, max_x;
+    getmaxyx(win, max_y, max_x);
+    auto safe_mvwaddch = [&](int yy, int xx, chtype ch) {
+        if (yy >= 0 && yy < max_y && xx >= 0 && xx < max_x)
+            mvwaddch(win, yy, xx, ch);
+    };
+
+	safe_mvwaddch(y, x + 2, '^');
+	safe_mvwaddch(y + 1, x + 1, '/');
+	safe_mvwaddch(y + 1, x + 2, '|');
+	safe_mvwaddch(y + 1, x + 3, '\\');
+	safe_mvwaddch(y + 2, x, '<');
+	safe_mvwaddch(y + 2, x + 1, '=');
+	safe_mvwaddch(y + 2, x + 2, '=');
+	safe_mvwaddch(y + 2, x + 3, '=');
+	safe_mvwaddch(y + 2, x + 4, '>');
 }
 
 void Player::setEntityManager(EntityManager *manager)
