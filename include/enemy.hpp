@@ -22,7 +22,7 @@ public:
 
     void update() override;
     void draw(WINDOW* win) override;
-
+	void resetShootTimer();
     bool readyToShoot() const; // optional helper
 };
 

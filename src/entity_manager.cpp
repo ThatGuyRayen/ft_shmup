@@ -32,14 +32,6 @@ void EntityManager::updateAll()
     for (auto e : entities)
     {
         e->update();
-
-        Enemy* enemy = dynamic_cast<Enemy*>(e);
-        if (enemy && enemy->readyToShoot())
-        {
-            Projectile* shot = enemy->shoot();
-            if (shot)
-                add(shot);
-        }
     }
 
     // Remove off-screen projectiles
@@ -53,7 +45,6 @@ void EntityManager::updateAll()
         return false;
     }), entities.end());
 }
-
 
 void EntityManager::drawAll(WINDOW* win)
 {
