@@ -13,6 +13,8 @@ class GameEntity
 		symbol(symbol)
 	{
 	}
+    int getX() const { return x; }
+    int getY() const { return y; }
 
 	virtual void update() = 0;
 	virtual void draw(WINDOW *win) = 0;

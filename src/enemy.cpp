@@ -1,45 +1,55 @@
 
 #include "enemy.hpp"
+#include <cstdlib> // for rand()
 
-// Constructor initializes boundaries and timers, positions the enemy
-
-Enemy::Enemy(int maxX, int maxY, int startX, int startY)
-    : shootCooldown(30), shootTimer(0), maxX(maxX), maxY(maxY)
+Enemy::Enemy(int startX, int startY, int maxX, int maxY)
+    : maxX(maxX), maxY(maxY), shootCooldown(30), shootTimer(0), entityManager(nullptr)
 {
     x = startX;
     y = startY;
+    symbol = '^'; // optional, emoji used in draw()
 }
 
+void Enemy::setEntityManager(EntityManager* manager)
+{
+    entityManager = manager;
+}
 
-// Shoot projectile downwards from enemy position
-Projectile* Enemy::shoot() {
+Projectile* Enemy::shoot()
+{
+    // Shoot downward
     return new Projectile(x, y + 1, 0, 1);
 }
 
-// Returns whether enemy can shoot now
-bool Enemy::readyToShoot() const {
+bool Enemy::readyToShoot() const
+{
     return shootTimer >= shootCooldown;
 }
 
-// Update enemy timers and possibly position (optional boundary checks added)
-void Enemy::update() {
+void Enemy::update()
+{
     shootTimer++;
-    if (shootTimer >= shootCooldown) {
+    if (shootTimer >= shootCooldown)
         shootTimer = 0;
-        // actual shooting triggered outside
+
+    // Random movement: left/right/down
+    int r = rand() % 100;
+    if (r < 3 && x > 1)
+        x--;
+    else if (r < 6 && x < maxX - 2)
+        x++;
+    else if (r < 9 && y < maxY - 2)
+        y++;
+
+    // Random shooting with ~5% chance per frame if cooldown ready
+    if (entityManager && readyToShoot() && (rand() % 100) < 5) {
+        entityManager->add(shoot());
     }
-
-    // Optional: keep enemy within bounds
-    if (x < 0) x = 0;
-    if (x > maxX) x = maxX;
-    if (y < 0) y = 0;
-    if (y > maxY) y = maxY;
-
-    // TODO: add enemy movement logic here if needed
 }
 
-// Draw enemy as rocket emoji on window at position (y, x)
-void Enemy::draw(WINDOW* win) {
+void Enemy::draw(WINDOW* win)
+{
+    // Draw emoji rocket 🚀
     mvwaddwstr(win, y, x, L"🚀");
 }
 

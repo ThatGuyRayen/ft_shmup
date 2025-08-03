@@ -3,6 +3,7 @@
 #pragma once
 #include <vector>
 #include "game_entity.hpp"
+#include "player.hpp"
 #include <ncurses.h>
 
 class EntityManager {
@@ -16,7 +17,7 @@ public:
     void remove(GameEntity* entity);
     void updateAll();
     void drawAll(WINDOW* win);
-
+    void handleCollisions(Player &player);
     // Add this getter:
     const std::vector<GameEntity*>& getEntities() const {
         return entities;
